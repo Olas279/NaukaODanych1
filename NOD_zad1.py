@@ -61,24 +61,51 @@ kolumny_kat = df.select_dtypes(include="object")
 print(kolumny_kat.describe())
 
 # 12. Usunięcie brakujących wartości z ramki danych
+print("Braki przed usunięciem:\n", df.isnull().sum())
+df = df.dropna()
+print("Braki po usunięciu:\n", df.isnull().sum()) # dowód że ramka nie ma brakujących wartości
+print("Rozmiar ramki:", df.shape)
 
 # 13. Wybór wierszy i kolumn po nazwach oraz po indeksach, na różne sposoby
+print(df["Species"]) # jedna kolumna 
+print(df[["SepalLengthCm", "Species"]]) # kilka kolumn 
+print(df.iloc[0:5, [1, 5]]) # wybrane kolumny po pozycjach
+print(df.iloc[0:5, 1:4]) # zakres kolumn po pozycjach
+print(df.loc[2:7]) # wiersze 2-7
+print(df.loc[1:5, "SepalLengthCm"]) # wiersze 1-5, jedna kolumna
 
 # 14. Wybierz wiersze pod warunkiem dotyczącym wartości jednej kolumny
+dlugie_dzialki_kielicha = df[df["SepalLengthCm"] > 6.0]
+print(dlugie_dzialki_kielicha)
 
 # 15. Wybierz wiersze pod warunkiem spełnienia kilku warunków jednocześnie
+wybrane = df[(df["SepalLengthCm"] > 5.5) & (df["PetalWidthCm"] < 1.5)]
+print(wybrane)
 
 # 16. Wybierz wiersze zawierające w kolumnie kategoryzowanej określone słowo
+zawiera = df[df["Species"].str.contains("setosa")]
+print(zawiera)
 
 # 17. Wybierz wiersze niezawierające w kolumnie kategoryzowanej określonego słowa
+nie_zawiera = df[~df["Species"].str.contains("setosa")]
+print(nie_zawiera)
 
 # 18. Utwórz nową kolumnę na podstawie istniejących
+df["SepalArea"] = df["SepalLengthCm"] * df["SepalWidthCm"]
+print(df.head())
 
 # 19. Usuń kolumnę
+df = df.drop(columns="SepalArea")
+print(df.columns)
 
 # 20. Zmień nazwę kolumny
+df = df.rename(columns={"Species": "Gatunek"})
+print(df.columns)
+#df = df.rename(columns={"Gatunek": "Species"}) # kod zmieniający z powrotem nazwę kolumny
 
 # 21. Zapisz ramkę danych jako plik CSV na dysku
+df.to_csv("Iris_wynik.csv", index=False)
+print("Zapisano plik Iris_wynik.csv")
 
 # 22. Wyświetl średnią (oraz maksymalną i minimalną) wartość z wybranej kolumny
 
