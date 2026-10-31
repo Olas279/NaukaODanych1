@@ -4,6 +4,8 @@ import kagglehub
 # 1. Załaduj bibliotekę pandas
 import pandas as pd
 
+import numpy as np
+
 sciezka = kagglehub.dataset_download("uciml/iris")
 print(sciezka) 
 
@@ -108,32 +110,82 @@ df.to_csv("Iris_wynik.csv", index=False)
 print("Zapisano plik Iris_wynik.csv")
 
 # 22. Wyświetl średnią (oraz maksymalną i minimalną) wartość z wybranej kolumny
+print("Średnia:", df["SepalLengthCm"].mean())
+print("Maksimum:", df["SepalLengthCm"].max())
+print("Minimum:", df["SepalLengthCm"].min())
 
 # 23. Wyświetl liczbę wierszy
+print("Liczba wierszy:", len(df)) # możliwe jest także wykorzystanie funkcji shape: df.shape[0]
 
 # 24. Wyświetl wartości unikatowe w wybranej kolumnie
+print(df["Gatunek"].unique())
+print("Ile unikatowych:", df["Gatunek"].nunique())
 
 # 25. Wyświetl liczbę rekordów odpowiadających poszczególnym wartościom
+print(df["Gatunek"].value_counts())
 
 # 26. Posortuj wiersze według wartości wybranej kolumny (rosnąco i malejąco)
+print(df.sort_values("SepalLengthCm", ascending=True)) # rosnąco
+print(df.sort_values("SepalLengthCm", ascending=False)) # malejąco
 
 # 27. Wyświetl wiersze dla 10 największych i 10 najmniejszych wartości wybranej kolumny
+print(df.nlargest(10, "SepalLengthCm"))
+print(df.nsmallest(10, "SepalLengthCm"))
 
 # 28. Wyświetl wiersze dla 10 największych wartości wybranej kolumny pod warunkiem określonych wartości innej kolumny
+virginica = df[df["Gatunek"] == "Iris-virginica"] # wybrano gatunek iris- virginica
+print(virginica.nlargest(10, "SepalLengthCm"))
+
+# sztuczna kolumna kategoryzowana: płatek długi/krótki względem mediany
+mediana = df["PetalLengthCm"].median()
+df["RozmiarPlatka"] = np.where(df["PetalLengthCm"] > mediana, "dlugi", "krotki")
+
+kolumny_liczbowe = ["SepalLengthCm", "SepalWidthCm", "PetalLengthCm", "PetalWidthCm"]
+# df = df.drop(columns="RozmiarPlatka") - kod usunięcia sztucznej kolumny
 
 # 29. Pogrupuj wiersze według wartości kolumny kategoryzowanej i uśrednij wartości wszystkich kolumn w grupach (MultiIndex)
+grupy = df.groupby(["Gatunek", "RozmiarPlatka"])[kolumny_liczbowe].mean()
+print(grupy)
+print(grupy.index) # wykorzystanie MultiIndex
 
 # 30. Pogrupuj wiersze według kolumny kategoryzowanej i policz: średnią dla wybranych kolumn oraz liczbę wartości i medianę dla pozostałych
+wynik30 = df.groupby("Gatunek").agg({
+    "SepalLengthCm": ["mean"],
+    "SepalWidthCm": ["mean"],
+    "PetalLengthCm": ["count", "median"],
+    "PetalWidthCm": ["count", "median"],
+})
+print(wynik30)
 
 # 31. Wyświetl nazwy kolumn indeksu złożonego
+print(grupy.index.names) # wyświetla kolumny ['Gatunek', 'RozmiarPlatka']
 
 # 32. Posortuj po kolumnie indeksu złożonego
+print(grupy.sort_index(level="RozmiarPlatka"))
+print(grupy.sort_index(level="Gatunek", ascending=False))
 
 # 33. Utwórz tabelę przestawną (pivot table) na podstawie ramki danych
+pivot = df.pivot_table(
+    values=["SepalLengthCm", "PetalLengthCm"],
+    index="Gatunek",
+    columns="RozmiarPlatka",
+    aggfunc="mean",
+)
+print(pivot)
 
 # 34. Wyświetl indeksy i kolumny tabeli przestawnej
+print(pivot.index)
+print(pivot.columns)
 
 # 35. Utwórz indeks złożony tabeli przestawnej i wyświetl go.
+pivot35 = df.pivot_table(
+    values=["SepalLengthCm", "PetalLengthCm"],
+    index=["Gatunek", "RozmiarPlatka"],
+    aggfunc="mean",
+)
+print(pivot35)
+print(pivot35.index)
+print(pivot35.index.names)
 
 # 36. Zaimportuj moduł pyplot z biblioteki matplotlib
 
