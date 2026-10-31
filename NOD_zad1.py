@@ -6,6 +6,9 @@ import pandas as pd
 
 import numpy as np
 
+# 36. Zaimportuj moduł pyplot z biblioteki matplotlib
+import matplotlib.pyplot as plt
+
 sciezka = kagglehub.dataset_download("uciml/iris")
 print(sciezka) 
 
@@ -187,32 +190,111 @@ print(pivot35)
 print(pivot35.index)
 print(pivot35.index.names)
 
-# 36. Zaimportuj moduł pyplot z biblioteki matplotlib
-
 # 37. Ustaw rysowanie wykresów bezpośrednio w zeszycie, a nie w osobnym oknie
+try:
+    from IPython import get_ipython
+    ipython = get_ipython()
+    if ipython is not None:
+        ipython.run_line_magic("matplotlib", "inline")
+except ImportError:
+    pass
 
 # 38. Wyświetl wykres na podstawie tabeli przestawnej
+pivot_wykres = df.pivot_table(
+    values=["SepalLengthCm", "PetalLengthCm"],
+    index="Gatunek",
+    aggfunc="mean",
+)
+print(pivot_wykres)
+pivot_wykres.plot(kind="bar", figsize=(8, 5))
+plt.title("Średnie wymiary według gatunku")
+plt.ylabel("cm")
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.savefig("wykres_pivot.png") # zapis do pliku 
+plt.show() # zamknięcie okna
 
 # 39. Narysuj histogram na podstawie wartości wybranej kolumny
+plt.figure(figsize=(8, 5))
+plt.hist(df["PetalLengthCm"], bins=15, edgecolor="black")
+plt.title("Histogram długości płatka")
+plt.xlabel("PetalLengthCm")
+plt.ylabel("Liczba wierszy")
+plt.tight_layout()
+plt.savefig("histogram.png")
+plt.show()
 
 # 40. Przedstaw łączenie ramek danych metodami merge i concat
+lewa = df[["Id", "SepalLengthCm", "Gatunek"]]
+prawa = df[["Id", "PetalLengthCm"]]
+polaczona = pd.merge(lewa, prawa, on="Id", how="inner")
+print(polaczona.head())
+
+opis = pd.DataFrame({
+    "Gatunek": ["Iris-setosa", "Iris-versicolor", "Iris-virginica"],
+    "Rodzaj": ["A", "B", "C"],
+})
+print(pd.merge(df, opis, on="Gatunek", how="left").head())
+
+gora = df.head(3)
+dol = df.tail(3)
+print(pd.concat([gora, dol])) # pod sobą
+print(pd.concat([lewa.head(), prawa.head()], axis=1)) # obok siebie
 
 # 41. Dodaj nowe kolumny za pomocą operacji matematycznych
+df["SepalArea"] = df["SepalLengthCm"] * df["SepalWidthCm"]
+df["PetalRatio"] = df["PetalLengthCm"] / df["PetalWidthCm"]
+df["SumaWymiarow"] = (df["SepalLengthCm"] + df["SepalWidthCm"]
+                      + df["PetalLengthCm"] + df["PetalWidthCm"])
+print(df[["SepalArea", "PetalRatio", "SumaWymiarow"]].head())
 
 # 42. Dodaj nowe kolumny z użyciem funkcji lambda
+df["SepalLengthMm"] = df["SepalLengthCm"].apply(lambda x: x * 10)
+df["DuzyPlatek"] = df["PetalLengthCm"].apply(lambda x: "tak" if x > 4 else "nie")
+df["SredniaWymiarow"] = df.apply(
+    lambda w: (w["SepalLengthCm"] + w["SepalWidthCm"]
+               + w["PetalLengthCm"] + w["PetalWidthCm"]) / 4,
+    axis=1,
+)
+print(df[["SepalLengthMm", "DuzyPlatek", "SredniaWymiarow"]].head())
 
 # 43. Pokaż pracę z dużym plikiem przy użyciu argumentu chunksize
+suma = 0
+liczba = 0
+for fragment in pd.read_csv(f"{sciezka}/Iris.csv", chunksize=50):
+    print("Fragment o rozmiarze:", fragment.shape)
+    suma += fragment["SepalLengthCm"].sum()
+    liczba += len(fragment)
+
+print("Średnia policzona z fragmentów:", suma / liczba)
+print("Kontrola z całej ramki:", df["SepalLengthCm"].mean())
+
+kol = "PetalLengthCm"
 
 # 44. Średnia arytmetyczna. Policz średnią wybranej kolumny liczbowej (df["kol"].mean() lub np.mean). Zinterpretuj, jaki to typowy poziom wartości
+print("44. Średnia pandas:", df[kol].mean())
+print("44. Średnia numpy: ", np.mean(df[kol]))
 
 # 45. Mediana. Policz medianę tej samej kolumny (df["kol"].median() lub np.median). Porównaj ze średnią i wyjaśnij różnicę w kontekście wartości odstających
+print("45. Mediana pandas:", df[kol].median())
+print("45. Mediana numpy: ", np.median(df[kol]))
 
 # 46. Odchylenie standardowe. Policz odchylenie standardowe (df["kol"].std() lub np.std). Zinterpretuj jako miarę rozproszenia danych
+print("46. Odchylenie pandas:", df[kol].std())
+print("46. Odchylenie numpy: ", np.std(df[kol], ddof=1))
 
 # 47. Wariancja. Policz wariancję (df["kol"].var() lub np.var) i pokaż, że jest kwadratem odchylenia standardowego
+print("47. Wariancja pandas:", df[kol].var())
+print("47. Wariancja numpy: ", np.var(df[kol], ddof=1))
+print("47. Odchylenie do kwadratu:", df[kol].std() ** 2)
+print("47. Czy równe:", np.isclose(df[kol].var(), df[kol].std() ** 2))
 
 # 48. Korelacja. Policz korelację Pearsona między dwiema kolumnami liczbowymi (df["a"].corr(df["b"]) lub np.corrcoef). Zinterpretuj znak i siłę zależności
+print("48. Korelacja pandas:", df["PetalLengthCm"].corr(df["PetalWidthCm"]))
+print("48. Korelacja numpy: ", np.corrcoef(df["PetalLengthCm"], df["PetalWidthCm"])[0, 1])
 
 # 49. Kowariancja. Policz kowariancję tych samych dwóch kolumn (df["a"].cov(df["b"]) lub np.cov). Wyjaśnij, czym różni się od korelacji
+print("49. Kowariancja pandas:", df["PetalLengthCm"].cov(df["PetalWidthCm"]))
+print("49. Kowariancja numpy: ", np.cov(df["PetalLengthCm"], df["PetalWidthCm"])[0, 1])
 
 # 50. Zadanie podsumowujące
