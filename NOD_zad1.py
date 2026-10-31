@@ -11,24 +11,54 @@ print(sciezka)
 df = pd.read_csv(f"{sciezka}/Iris.csv")
 df.head()
 
+# 2. Ramka danych ze słownika
+dane_slownik = {
+    "SepalLengthCm": [5.1, 4.9, 4.7],
+    "SepalWidthCm": [3.5, 3.0, 3.2],
+    "Species": ["Iris-setosa", "Iris-setosa", "Iris-setosa"],
+}
+df_slownik = pd.DataFrame(dane_slownik)
+print(df_slownik)
+
+# 3. Ramka danych z listy list
+dane_listy = [
+    [5.1, 3.5, "Iris-setosa"],
+    [4.9, 3.0, "Iris-setosa"],
+    [4.7, 3.2, "Iris-setosa"],
+]
+df_listy = pd.DataFrame(dane_listy, columns=["SepalLengthCm", "SepalWidthCm", "Species"])
+print(df_listy)
+
+
 # 4. Zamiana danych z CSV na XLSX oraz wczytanie danych do ramki
 df.to_excel("Iris.xlsx", index=False)
 df_xlsx = pd.read_excel("Iris.xlsx")
 print(df_xlsx.head())
 
 # 5. Transponowanie ramki
+print(df.head().T)
 
 # 6. Pierwsze 10 wierszy ramki
+print(df.head(10))
 
 # 7. Ostatnie 10 wierszy ramki
+print(df.tail(10))
 
 # 8. Informacje o ramce danych
+df.info()
 
 # 9. Ilość wierszy i kolumn w ramce
+print(df.shape)
+print("Wiersze:", df.shape[0])
+print("Kolumny:", df.shape[1])
 
 # 10. Statystyki kolumn liczbowych
+kolumny_num = df.select_dtypes(include="number").drop(columns="Id")
+print(kolumny_num.describe())
 
 # 11. Statystyki kolumn kategoryzowanych
+kolumny_kat = df.select_dtypes(include="object")
+print(kolumny_kat.describe())
 
 # 12. Usunięcie brakujących wartości z ramki danych
 
